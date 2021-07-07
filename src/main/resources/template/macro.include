@@ -1,0 +1,36 @@
+<#-- 本文件包含一些公共的函数,本文件会被其它模板自动include -->
+
+<#assign author = "autoCode">
+
+<#assign version = "1.0.5">
+
+<#-- 将value变成jsp el表达式,主要由于FreeMarker生成表达式不方便 -->
+<#macro jspEl value>${r"${"}${value}}</#macro>
+
+
+<#-- 转换nvarchr2 为nvarchar等-->
+<#macro jdbcType value>
+<#local  jdbcTypeName=value?replace(" UNSIGNED","")/>
+<#switch jdbcTypeName><#case "LONGBLOB">${"VARCHAR"}<#break><#case "ENUM">${"CHAR"}<#break><#case "MEDIUMTEXT">${"VARCHAR"}<#break><#case "MEDIUMINT">${"INTEGER"}<#break><#case "LONGTEXT">${"LONGVARCHAR"}<#break><#case "TEXT">${"VARCHAR"}<#break><#case "INT">${"INTEGER"}<#break><#case "DATE">${"DATE"}<#break><#case "DATETIME">${"TIMESTAMP"}<#break><#case "NUMBER">${"DECIMAL"}<#break><#case "NVARCHAR2">${"NVARCHAR"}<#break><#case "VARCHAR2">${"VARCHAR"}<#break><#default>${jdbcTypeName}<#break></#switch></#macro>
+
+<#-- 截取最后一个单词-->
+<#macro mapperFQN value>${value?replace('java.*\\.','','r')}</#macro>
+
+<#-- 生成java构造函数 -->
+<#macro generateConstructor constructor>
+	public ${constructor}(){
+	}
+
+	public ${constructor}(
+	<#list table.compositeIdColumns as column>
+		${column.javaType} ${column.columnNameLower}<#if column_has_next>,</#if>
+	</#list>		
+	){
+	<#list table.compositeIdColumns as column>
+		<#if column.pk>
+		this.${column.columnNameLower} = ${column.columnNameLower};
+		</#if>
+	</#list>	
+	}
+
+</#macro>
